@@ -1,6 +1,8 @@
 import * as Koa from "koa";
 import * as notjs from "not.js";
 import * as favicon from "koa-favicon";
+import * as mount from "koa-mount";
+import * as staticfiles from "koa-static";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -30,13 +32,16 @@ app.use(async (ctx, next) => {
 });
 
 // Favicon handling middleware
-app.use(favicon(path.join(__dirname, "favicon.ico")));
+app.use(favicon(path.join(__dirname, "static/favicon.ico")));
 
 // Site API Middleware
 app.use(async (ctx, next) => {
     if (!ctx.url.startsWith("/api/")) return await next();
     ctx.body = ctx.url;
 });
+
+// Static Site Assets
+app.use(mount("/static", staticfiles("./static")));
 
 async function fileExists(path: string) {
     return await new Promise<boolean>((resolve, reject) => {

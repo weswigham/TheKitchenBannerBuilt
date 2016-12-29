@@ -24,9 +24,13 @@
   "dependencies": {
     "@types/koa": "^2.0.37",
     "@types/koa-favicon": "^2.0.17",
+    "@types/koa-mount": "^2.0.18",
+    "@types/koa-static": "^2.0.22",
     "@types/not.js": "weswigham/AtTypes-not.js",
     "koa": "^2.0.0-alpha.7",
     "koa-favicon": "^2.0.0",
+    "koa-mount": "^2.0.0",
+    "koa-static": "^3.0.0",
     "not.js": "0.0.10",
     "ts-node": "^1.7.3",
     "typescript": "^2.1.4"
