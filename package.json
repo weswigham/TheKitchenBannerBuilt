@@ -27,6 +27,7 @@
     "@types/koa-favicon": "^2.0.17",
     "@types/koa-mount": "^2.0.18",
     "@types/koa-static": "^2.0.22",
+    "@types/node": "^6.0.54",
     "@types/nodegit": "weswigham/AtTypes-nodegit",
     "@types/not.js": "weswigham/AtTypes-not.js",
     "@types/search-index": "weswigham/AtTypes-search-index",

@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import * as Koa from "koa";
 import * as notjs from "not.js";
 import * as favicon from "koa-favicon";
@@ -65,6 +67,32 @@ async function fileExists(path: string) {
 
 // Site Page Rendering Middleware
 app.use(async (ctx, next) => {
+    if (ctx.url === "/") {
+        console.log(`Rendering index...`);
+        const context = {
+            recipes: (await new Promise<{title: string, preview: string}[]>((resolve, reject) => {
+                const recipes: {title: string, preview: string}[] = [];
+                ctx.recipeSearchIndex.search({
+                    query: {
+                        AND: {"*": ["*"]}
+                    },
+                    pageSize: 400
+                })
+                .on("data", ({document: data}: {document: Document}) => {
+                    if (recipes.find(r => r.title === data.title)) return;
+                    recipes.push({title: data.title, preview: data.fulltext.length > 50 ? `${data.fulltext.substring(0, 50)}...` : data.fulltext});
+                })
+                .on("end", () => {
+                    resolve(recipes);
+                })
+                .on("error", (err: any) => {
+                    reject(err);
+                });
+            })).sort((a, b) => a.title.localeCompare(b.title))
+        };
+        ctx.body = notjs.renderFunc(require("./pages/index.not.js"), context, undefined, path.dirname(path.join(__dirname, "./pages/index.not.js")));
+        return;
+    }
     const template = path.join(__dirname, "./pages", `${ctx.url}.not.js`);
     const indexTemplate = path.join(__dirname, "./pages", `${ctx.url}/index.not.js`);
     if (await fileExists(template)) {

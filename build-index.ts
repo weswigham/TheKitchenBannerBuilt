@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import * as git from "nodegit";
 import * as searchIndex from "search-index";
 import * as path from "path";
@@ -15,12 +16,16 @@ export default function buildIndex(provided?: git.Repository) {
             const masterCommit = await repo.getBranchCommit("master");
             const diff = await git.Diff.treeToTree(repo, null, await masterCommit.getTree());
             const patches = await diff.patches();
-            const objects = await Promise.all(patches.map(async (p) => {
+            const uniqueness: {[index: string]: git.Oid} = {};
+            const objects = await Promise.all(patches.map((p) => {
                 const file = p.newFile();
-                return {path: file.path(), content: (await repo.getBlob(file.id())).content()};
-            }));
+                return {path: file.path(), id: file.id()};
+            }).filter(o => {
+                return !(o.path in uniqueness) && (uniqueness[o.path] = o.id);
+            }).map(async o => ({path: o.path, content: (await repo.getBlob(o.id)).content()})));
             const recipes: Document[] = objects.filter(o => o.path.endsWith(".md") && !o.path.endsWith("README.md")).map(o => {
-                return {title: path.basename(o.path).split(/(?=[A-Z])/).join(" "), fulltext: o.content.toString()}
+                const name = path.basename(o.path);
+                return {title: name.substring(0, name.length-3).split(/(?=[A-Z])/).join(" "), fulltext: o.content.toString()}
             });
             si.concurrentAdd({fieldOptions: {}}, recipes, err => {
                 if (err) return reject(err);
