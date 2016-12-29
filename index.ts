@@ -37,9 +37,17 @@ app.use(favicon(path.join(__dirname, "static/favicon.ico")));
 // Static Site Assets
 app.use(mount("/static", staticfiles("./static")));
 
-import api = require("./api");
 // Site API Middleware
+import api = require("./api");
 app.use(mount("/api", api));
+
+import {Index} from "search-index";
+import {Document} from "./build-index";
+declare module "koa" {
+    interface Context {
+        recipeSearchIndex: Index<Document>;
+    }
+}
 
 async function fileExists(path: string) {
     return await new Promise<boolean>((resolve, reject) => {
@@ -75,4 +83,8 @@ app.use(async (ctx, next) => {
     }
 });
 
-app.listen(app.env === "development" ? 3000 : 80);
+import buildIndex from "./build-index";
+buildIndex().then(si => {
+    app.context.recipeSearchIndex = si;
+    app.listen(app.env === "development" ? 3000 : 80);
+});
