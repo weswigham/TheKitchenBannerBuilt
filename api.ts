@@ -16,7 +16,7 @@ hook.on("push", async (data: GithubWebhookEventData) => {
     // Update repo on disk
     const repo = await git.Clone.clone(process.env.RECIPE_BOX_TARGET || "https://github.com/ibanner56/NotRubyButChef.git", "../recipe_box");
     // TODO: Precalculate/cache more stuff (fuzzy name search set, full text search index)?
-    const newIndex = await buildIndex();
+    const newIndex = await buildIndex(repo);
     app.context.recipeSearchIndex.close(err => {
         if (err) console.error(err); // Errors closing the search index can get logged, but are probably ignorable
     });

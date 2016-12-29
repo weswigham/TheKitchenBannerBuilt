@@ -7,11 +7,11 @@ export interface Document {
     fulltext: string;
 }
 
-export default function buildIndex() {
+export default function buildIndex(provided?: git.Repository) {
     return new Promise<searchIndex.Index<Document>>((resolve, reject) => {
         searchIndex<Document>({preserveCase: false}, async (err, si) => {
             if (err) return reject(err);
-            const repo = await git.Repository.open("../recipe_box");
+            const repo = provided || await git.Repository.open("../recipe_box");
             const masterCommit = await repo.getBranchCommit("master");
             const diff = await git.Diff.treeToTree(repo, null, await masterCommit.getTree());
             const patches = await diff.patches();
