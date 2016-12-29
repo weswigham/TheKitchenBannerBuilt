@@ -1,7 +1,8 @@
 import * as Koa from "koa";
 import * as bodyparser from "koa-bodyparser";
-import GithubWebhook, { GithubWebhookEventData } from "./github-webhook";
 import * as git from "nodegit";
+import * as mount from "koa-mount";
+import GithubWebhook, { GithubWebhookEventData } from "./github-webhook";
 import buildIndex from "./build-index";
 
 const app = new Koa();
@@ -24,8 +25,35 @@ hook.on("push", async (data: GithubWebhookEventData) => {
 });
 app.use(hook.middleware());
 
-app.use(async (ctx, next) => {
-    ctx.body = ctx.url;
-});
+app.use(mount("/suggest", async (ctx, next) => {
+    if (ctx.method !== "GET") {
+        ctx.status = 405;
+        return;
+    };
+    if (!ctx.query) {
+        ctx.body = { error: "Query parameters not supplied" };
+        ctx.status = 400;
+        ctx.type = "json";
+    }
+    if (!ctx.query["input"]) {
+        ctx.body = { error: "Required query parameter 'input' not supplied" };
+        ctx.status = 400;
+        ctx.type = "json";
+    }
+    const matches: string[] = [];
+    await new Promise((resolve, reject) => {
+        app.context.recipeSearchIndex.match({beginsWith: ctx.query["input"], limit: 5, threshold: 3})
+        .on("data", (match: string) => {
+            matches.push(match);
+        })
+        .on("end", () => {
+            resolve();
+        })
+        .on("error", (err: any) => reject(err));
+    });
+    ctx.type = "json";
+    ctx.body = { results: matches };
+    ctx.status = 200;
+}));
 
 export = app;
