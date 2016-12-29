@@ -1,0 +1,34 @@
+{
+  "name": "the-kitchen-banner-built",
+  "version": "1.0.0",
+  "description": "A webinterface for searching ibanner56's recipe collection",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts",
+    "watch": "nodemon --watch **/*.ts --watch **/*.not.js --watch **/*.json --ignore test/**/*.ts --exec ts-node index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/weswigham/TheKitchenBannerBuilt.git"
+  },
+  "keywords": [
+    "recipe"
+  ],
+  "author": "Wesley Wigham",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/weswigham/TheKitchenBannerBuilt/issues"
+  },
+  "homepage": "https://github.com/weswigham/TheKitchenBannerBuilt#readme",
+  "dependencies": {
+    "@types/koa": "^2.0.37",
+    "@types/koa-favicon": "^2.0.17",
+    "@types/not.js": "weswigham/AtTypes-not.js",
+    "koa": "^2.0.0-alpha.7",
+    "koa-favicon": "^2.0.0",
+    "not.js": "0.0.10",
+    "ts-node": "^1.7.3",
+    "typescript": "^2.1.4"
+  }
+}
