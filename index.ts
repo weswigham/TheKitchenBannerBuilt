@@ -27,21 +27,19 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   const start = process.hrtime();
   await next();
-  const ms = process.hrtime(start);
-  console.log('%s %s - %ss %sns', ctx.method, ctx.url, ms[0], ms[1]);
+  const time = process.hrtime(start);
+  console.log('%s %s - %ss %sns', ctx.method, ctx.url, time[0], time[1]);
 });
 
 // Favicon handling middleware
 app.use(favicon(path.join(__dirname, "static/favicon.ico")));
 
-// Site API Middleware
-app.use(async (ctx, next) => {
-    if (!ctx.url.startsWith("/api/")) return await next();
-    ctx.body = ctx.url;
-});
-
 // Static Site Assets
 app.use(mount("/static", staticfiles("./static")));
+
+import api = require("./api");
+// Site API Middleware
+app.use(mount("/api", api));
 
 async function fileExists(path: string) {
     return await new Promise<boolean>((resolve, reject) => {
