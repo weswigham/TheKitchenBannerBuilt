@@ -10,7 +10,7 @@ module.exports = () => {
             ol
             for (const r of $scope.recipes) {
                 li
-                    h3; $(r.title); $h3;
+                    a({href: `/r/${r.slug}`}); h3; $(r.title); $h3; $a;
                     small; $(r.preview); $small;
                 $li
             }

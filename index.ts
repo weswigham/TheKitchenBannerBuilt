@@ -11,6 +11,7 @@ import * as fs from "fs";
 declare module "koa" {
     interface Context {
         recipeSearchIndex: Index<Document>;
+        recipeSlugMap: {[index: string]: Document};
     }
 }
 
@@ -49,10 +50,6 @@ app.use(mount("/static", staticfiles("./static")));
 import api = require("./api");
 app.use(mount("/api", api));
 
-import {Index} from "search-index";
-import {Document} from "./build-index";
-
-
 async function fileExists(path: string) {
     return await new Promise<boolean>((resolve, reject) => {
         try {
@@ -66,6 +63,45 @@ async function fileExists(path: string) {
         }
     });
 }
+
+import {Index} from "search-index";
+import {Document} from "./build-index";
+import {slug, deslug} from "./util";
+
+async function titleExists(index: Index<Document>, title: string) {
+    const hits = await new Promise<number>((resolve, reject) => {
+        index.totalHits({
+            query: {
+                AND: {
+                    "title": [deslug(title)]
+                }
+            },
+        }, (err, count) => {
+            if (err) return reject(err);
+            resolve(count);
+        });
+    });
+    return hits > 0;
+}
+
+import marked = require("marked");
+
+app.use(mount("/r", async (ctx, next) => {
+    const url = ctx.url.substring(1);
+    console.log(`Checking for existance of /r/${url}`);
+    if (ctx.recipeSlugMap[url]) {
+        console.log(`Rendering /r/${url}...`);
+        const entry = ctx.recipeSlugMap[url];
+        const renderContext = {
+            document: entry,
+            rendered: marked(entry.fulltext),
+        };
+        ctx.body = notjs.renderFunc(require("./pages/r.not.js"), renderContext, undefined, path.dirname(path.join(__dirname, "./pages/r.not.js")));
+    }
+    else {
+        await next();
+    }
+}));
 
 // Site Page Rendering Middleware
 app.use(async (ctx, next) => {
@@ -90,7 +126,7 @@ app.use(async (ctx, next) => {
                 .on("error", (err: any) => {
                     reject(err);
                 });
-            })).sort((a, b) => a.title.localeCompare(b.title))
+            })).sort((a, b) => a.title.localeCompare(b.title)).map(o => ({title: o.title, preview: o.preview, slug: slug(o.title)}))
         };
         ctx.body = notjs.renderFunc(require("./pages/index.not.js"), context, undefined, path.dirname(path.join(__dirname, "./pages/index.not.js")));
         return;
@@ -114,7 +150,8 @@ app.use(async (ctx, next) => {
 });
 
 import buildIndex from "./build-index";
-buildIndex().then(si => {
-    app.context.recipeSearchIndex = si;
+buildIndex().then(({index, cache}) => {
+    app.context.recipeSearchIndex = index;
+    app.context.recipeSlugMap = cache;
     app.listen(app.env === "development" ? 3000 : 80);
 });

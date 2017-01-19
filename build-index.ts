@@ -2,6 +2,7 @@
 import * as git from "nodegit";
 import * as searchIndex from "search-index";
 import * as path from "path";
+import {slug} from "./util";
 
 export interface Document {
     title: string;
@@ -9,7 +10,7 @@ export interface Document {
 }
 
 export default function buildIndex(provided?: git.Repository) {
-    return new Promise<searchIndex.Index<Document>>((resolve, reject) => {
+    return new Promise<{index: searchIndex.Index<Document>, cache: {[index: string]: Document}}>((resolve, reject) => {
         searchIndex<Document>({preserveCase: false, nGramLength: 3}, async (err, si) => {
             if (err) return reject(err);
             const repo = provided || await git.Repository.open("../recipe_box");
@@ -23,13 +24,16 @@ export default function buildIndex(provided?: git.Repository) {
             }).filter(o => {
                 return !(o.path in uniqueness) && (uniqueness[o.path] = o.id);
             }).map(async o => ({path: o.path, content: (await repo.getBlob(o.id)).content()})));
+            const map: {[index: string]: Document} = {};
             const recipes: Document[] = objects.filter(o => o.path.endsWith(".md") && !o.path.endsWith("README.md")).map(o => {
                 const name = path.basename(o.path);
-                return {title: name.substring(0, name.length-3).split(/(?=[A-Z])/).join(" "), fulltext: o.content.toString()}
+                const doc = {title: name.substring(0, name.length-3).split(/(?=[A-Z])/).join(" "), fulltext: o.content.toString()};
+                map[slug(doc.title)] = doc;
+                return doc;
             });
             si.concurrentAdd({fieldOptions: {}}, recipes, err => {
                 if (err) return reject(err);
-                resolve(si);
+                resolve({index: si, cache: map});
             });
         });
     })

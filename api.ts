@@ -17,11 +17,12 @@ hook.on("push", async (data: GithubWebhookEventData) => {
     // Update repo on disk
     const repo = await git.Clone.clone(process.env.RECIPE_BOX_TARGET || "https://github.com/ibanner56/NotRubyButChef.git", "../recipe_box");
     // TODO: Precalculate/cache more stuff (fuzzy name search set, full text search index)?
-    const newIndex = await buildIndex(repo);
+    const {index, cache} = await buildIndex(repo);
     app.context.recipeSearchIndex.close(err => {
         if (err) console.error(err); // Errors closing the search index can get logged, but are probably ignorable
     });
-    app.context.recipeSearchIndex = newIndex; // TODO: Figure out if this is shared between the API subapp and the parent as expected
+    app.context.recipeSearchIndex = index; // TODO: Figure out if this is shared between the API subapp and the parent as expected
+    app.context.recipeSlugMap = cache;
 });
 app.use(hook.middleware());
 
