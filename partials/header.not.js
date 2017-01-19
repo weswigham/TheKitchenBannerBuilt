@@ -1,6 +1,10 @@
 module.exports = () => {
     head
+        meta$({charset: "utf-8"});
+        meta$({"http-equiv": "X-UA-Compatible", content: "IE=edge"});
+
         title; $($scope.title); $title;
+        link({rel: "shortcut icon", href: "/favicon.ico"});
         /* jQuery */
         script({
             src: "https://code.jquery.com/jquery-3.1.1.slim.min.js",
