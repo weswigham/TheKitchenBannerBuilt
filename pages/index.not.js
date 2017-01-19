@@ -2,7 +2,7 @@ module.exports = () => {
     html
         $scope.title = "The Kitchen Banner Built";
         -include("../partials/header.not.js")
-        body;
+        body["container-fluid"];
             div.jumbotron;
                 h1["display-3"]; $("The Kitchen Banner Built"); $h1;
                 p.lead; $(`A collection of recipes maintained by <a href="https://github.com/ibanner56">ibanner56</a>, made searchable for your pleasure.`, true); $p;
