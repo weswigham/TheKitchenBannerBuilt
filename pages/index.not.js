@@ -10,19 +10,24 @@ module.exports = () => {
                 form({method: "POST", action: "/"})
                     div["form-group"];
                         label({for: "search"}); $("Search"); $label;
-                        input$({type: "text", id: "search", placeholder: "Search..."})["form-control"];
+                        input$({type: "text", id: "search", name: "search", placeholder: "Search..."})["form-control"];
                         small["form-text"]["text-muted"]; $("Fulltext search! Try searching for things like 'avacado' or 'dutch oven'."); $small;
                     $div;
                 $form
             $div;
-            ol
-            for (const r of $scope.recipes) {
-                li
-                    a({href: `/r/${r.slug}`}); h3; $(r.title); $h3; $a;
-                    small; $(r.preview); $small;
-                $li
+            if ($scope.recipes.length) {
+                ol
+                for (const r of $scope.recipes) {
+                    li
+                        a({href: `/r/${r.slug}`}); h3; $(r.title); $h3; $a;
+                        small; $(r.preview); $small;
+                    $li
+                }
+                $ol
             }
-            $ol
+            else {
+                p; $(`No search results found.`); $p;
+            }
             script;
             $(`
                 $("input")[0].addEventListener("keypress", function(e) {

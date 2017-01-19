@@ -11,7 +11,7 @@ export interface Document {
 
 export default function buildIndex(provided?: git.Repository) {
     return new Promise<{index: searchIndex.Index<Document>, cache: {[index: string]: Document}}>((resolve, reject) => {
-        searchIndex<Document>({preserveCase: false, nGramLength: 3}, async (err, si) => {
+        searchIndex<Document>({preserveCase: false, nGramLength: 2}, async (err, si) => {
             if (err) return reject(err);
             const repo = provided || await git.Repository.open("../recipe_box");
             const masterCommit = await repo.getBranchCommit("master");

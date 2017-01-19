@@ -64,7 +64,7 @@ async function fileExists(path: string) {
     });
 }
 
-import {Index} from "search-index";
+import {Index, SearchOptions} from "search-index";
 import {Document} from "./build-index";
 import {slug, deslug} from "./util";
 
@@ -103,6 +103,9 @@ app.use(mount("/r", async (ctx, next) => {
     }
 }));
 
+import bodyparser = require("koa-bodyparser");
+app.use(bodyparser());
+
 // Site Page Rendering Middleware
 app.use(async (ctx, next) => {
     if (ctx.url === "/") {
@@ -110,12 +113,27 @@ app.use(async (ctx, next) => {
         const context = {
             recipes: (await new Promise<{title: string, preview: string}[]>((resolve, reject) => {
                 const recipes: {title: string, preview: string}[] = [];
-                ctx.recipeSearchIndex.search({
+                let query: SearchOptions<Document> = {
                     query: {
                         AND: {"*": ["*"]}
                     },
                     pageSize: 400
-                })
+                };
+                if (ctx.method === "POST" && ctx.request.body.search) {
+                    const term = ctx.request.body.search;
+                    console.log(`Searching for '${term}'...`);
+                    query = {
+                        query: [{
+                            AND: {title: [term]},
+                            BOOST: 10
+                        },
+                        {
+                            AND: {fulltext: [term]}
+                        }],
+                        pageSize: 30
+                    };
+                }
+                ctx.recipeSearchIndex.search(query)
                 .on("data", ({document: data}: {document: Document}) => {
                     if (recipes.find(r => r.title === data.title)) return;
                     recipes.push({title: data.title, preview: data.fulltext.length > 50 ? `${data.fulltext.substring(0, 50)}...` : data.fulltext});
@@ -126,8 +144,11 @@ app.use(async (ctx, next) => {
                 .on("error", (err: any) => {
                     reject(err);
                 });
-            })).sort((a, b) => a.title.localeCompare(b.title)).map(o => ({title: o.title, preview: o.preview, slug: slug(o.title)}))
+            })).map(o => ({title: o.title, preview: o.preview, slug: slug(o.title)}))
         };
+        if (ctx.method !== "POST" || !ctx.request.body.search) {
+            context.recipes = context.recipes.sort((a, b) => a.title.localeCompare(b.title));
+        }
         ctx.body = notjs.renderFunc(require("./pages/index.not.js"), context, undefined, path.dirname(path.join(__dirname, "./pages/index.not.js")));
         return;
     }
