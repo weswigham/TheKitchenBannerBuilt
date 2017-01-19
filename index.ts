@@ -22,12 +22,12 @@ app.use(async (ctx, next) => {
     try {
         await next();
     } catch (err) {
-        //if (app.env === "development") {
+        if (app.env === "development") {
             ctx.body = { message: err.message, stack: err.stack };
-        //}
-        //else {
-        //    ctx.body = { message: "Internal Server Error" }; // TODO: Render 500 page
-        //}
+        }
+        else {
+            ctx.body = { message: "Internal Server Error" }; // TODO: Render 500 page
+        }
         ctx.status = err.status || 500;
     }
 });
@@ -174,5 +174,5 @@ import buildIndex from "./build-index";
 buildIndex().then(({index, cache}) => {
     app.context.recipeSearchIndex = index;
     app.context.recipeSlugMap = cache;
-    app.listen(app.env === "development" ? 3000 : 80);
+    app.listen(app.env === "development" ? 3000 : process.env.port);
 });
