@@ -4,7 +4,7 @@ module.exports = () => {
         -include("../partials/header.not.js")
         body["container-fluid"];
             div.jumbotron;
-                h1["display-3"]; $("The Kitchen Banner Built"); $h1;
+                h1["display-3"]; a["fixed-color"]({href: "/"}); $("The Kitchen Banner Built"); $a; $h1;
                 p.lead; $(`A collection of recipes maintained by <a href="https://github.com/ibanner56">ibanner56</a>, made searchable for your pleasure.`, true); $p;
                 hr["my-4"];
                 form({method: "POST", action: "/"})
