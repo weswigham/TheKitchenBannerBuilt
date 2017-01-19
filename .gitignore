@@ -38,3 +38,6 @@ jspm_packages
 
 # Search index
 si
+
+# vscode settings
+.vscode
