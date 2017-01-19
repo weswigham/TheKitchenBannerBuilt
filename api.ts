@@ -35,11 +35,13 @@ app.use(mount("/suggest", async (ctx, next) => {
         ctx.body = { error: "Query parameters not supplied" };
         ctx.status = 400;
         ctx.type = "json";
+        return;
     }
     if (!ctx.query["input"]) {
         ctx.body = { error: "Required query parameter 'input' not supplied" };
         ctx.status = 400;
         ctx.type = "json";
+        return;
     }
     const matches: string[] = [];
     await new Promise((resolve, reject) => {

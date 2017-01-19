@@ -33,7 +33,8 @@ export default class GithubWebhookHandler extends EventEmitter {
 
     middleware() {
         return async (ctx: Context, next: () => Promise<any>) => {
-            if (ctx.request.path !== this.options.path) return await next();
+            console.log(ctx.url.substring(1));
+            if (ctx.url.substring(1) !== this.options.path) return await next();
 
             const sig = ctx.request.get('x-hub-signature');
             const event = ctx.request.get('x-github-event');
