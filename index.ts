@@ -8,6 +8,12 @@ import * as staticfiles from "koa-static";
 import * as path from "path";
 import * as fs from "fs";
 
+declare module "koa" {
+    interface Context {
+        recipeSearchIndex: Index<Document>;
+    }
+}
+
 const app = new Koa();
 
 // Highest level error handling middleware
@@ -45,11 +51,7 @@ app.use(mount("/api", api));
 
 import {Index} from "search-index";
 import {Document} from "./build-index";
-declare module "koa" {
-    interface Context {
-        recipeSearchIndex: Index<Document>;
-    }
-}
+
 
 async function fileExists(path: string) {
     return await new Promise<boolean>((resolve, reject) => {

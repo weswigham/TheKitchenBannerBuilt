@@ -37,7 +37,7 @@
     "koa-mount": "^2.0.0",
     "koa-static": "^3.0.0",
     "nodegit": "^0.16.0",
-    "not.js": "0.0.10",
+    "not.js": "0.1.0",
     "search-index": "^0.9.9",
     "ts-node": "^1.7.3",
     "typescript": "^2.1.4"
