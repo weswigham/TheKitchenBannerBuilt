@@ -174,5 +174,5 @@ import buildIndex from "./build-index";
 buildIndex().then(({index, cache}) => {
     app.context.recipeSearchIndex = index;
     app.context.recipeSlugMap = cache;
-    app.listen(app.env === "development" ? 3000 : process.env.port);
+    app.listen(process.env.port || (app.env === "development" ? 3000 : 80));
 });
