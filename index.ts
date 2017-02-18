@@ -114,16 +114,10 @@ app.use(async (ctx, next) => {
         const context = {
             recipes: (await new Promise<{title: string, preview: string}[]>((resolve, reject) => {
                 const recipes: {title: string, preview: string}[] = [];
-                let query: SearchOptions<Document> = {
-                    query: {
-                        AND: {"*": ["*"]}
-                    },
-                    pageSize: 400
-                };
                 if (ctx.method === "POST" && ctx.request.body.search) {
                     const term = ctx.request.body.search;
                     console.log(`Searching for '${term}'...`);
-                    query = {
+                    const query = {
                         query: [{
                             AND: {title: [term]},
                             BOOST: 10
@@ -133,18 +127,24 @@ app.use(async (ctx, next) => {
                         }],
                         pageSize: 30
                     };
+                    ctx.recipeSearchIndex.search(query)
+                    .on("data", ({document: data}: {document: Document}) => {
+                        if (recipes.find(r => r.title === data.title)) return;
+                        recipes.push({title: data.title, preview: data.fulltext.length > 50 ? `${data.fulltext.substring(0, 50)}...` : data.fulltext});
+                    })
+                    .on("end", () => {
+                        resolve(recipes);
+                    })
+                    .on("error", (err: any) => {
+                        reject(err);
+                    });
                 }
-                ctx.recipeSearchIndex.search(query)
-                .on("data", ({document: data}: {document: Document}) => {
-                    if (recipes.find(r => r.title === data.title)) return;
-                    recipes.push({title: data.title, preview: data.fulltext.length > 50 ? `${data.fulltext.substring(0, 50)}...` : data.fulltext});
-                })
-                .on("end", () => {
-                    resolve(recipes);
-                })
-                .on("error", (err: any) => {
-                    reject(err);
-                });
+                else {
+                    resolve(Object.keys(ctx.recipeSlugMap).map(r => ({
+                        title: ctx.recipeSlugMap[r].title,
+                        preview: ctx.recipeSlugMap[r].fulltext.length > 50 ? `${ctx.recipeSlugMap[r].fulltext.substring(0, 50)}...` : ctx.recipeSlugMap[r].fulltext
+                    })));
+                }
             })).map(o => ({title: o.title, preview: o.preview, slug: slug(o.title)}))
         };
         if (ctx.method !== "POST" || !ctx.request.body.search) {

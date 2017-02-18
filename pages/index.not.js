@@ -17,14 +17,14 @@ module.exports = () => {
                     $form
                 $div;
                 if ($scope.recipes.length) {
-                    ol
+                    ul({style: "list-style-type: none"})
                     for (const r of $scope.recipes) {
                         li
                             a({href: `/r/${r.slug}`}); h3; $(r.title); $h3; $a;
                             small; $(r.preview); $small;
                         $li
                     }
-                    $ol
+                    $ul
                 }
                 else {
                     p.lead; $(`No search results found.`); $p;
