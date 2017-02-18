@@ -45,6 +45,7 @@ app.use(favicon(path.join(__dirname, "static/favicon.ico")));
 
 // Static Site Assets
 app.use(mount("/static", staticfiles("./static")));
+app.use(mount("/.well-known", staticfiles("./.well-known")));
 
 // Site API Middleware
 import api = require("./api");
