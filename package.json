@@ -40,7 +40,7 @@
     "marked": "^0.3.6",
     "nodegit": "^0.16.0",
     "not.js": "0.1.0",
-    "search-index": "^0.9.9",
+    "search-index": "^0.9.15",
     "ts-node": "^1.7.3",
     "typescript": "^2.1.4"
   }
